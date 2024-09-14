@@ -103,18 +103,18 @@ std::string runShrdPtrTests() {
 
 std::string runLinkedListUniqueTests() {
     std::ostringstream result;
-    result << "LinkedListUnique Tests:\n";
+    result << "LinkedList Tests:\n";
 
     result << "  Functional Test 1: ";
     {
-        LinkedListUnique<int> list;
+        LinkedList<int> list;
         list.push_front(10);
         result << (list.size() == 1 ? "Passed" : "Failed") << "\n";
     }
 
     result << "  Functional Test 2: ";
     {
-        LinkedListUnique<int> list;
+        LinkedList<int> list;
         list.push_front(10);
         list.pop_front();
         result << (list.size() == 0 ? "Passed" : "Failed") << "\n";
@@ -122,13 +122,13 @@ std::string runLinkedListUniqueTests() {
 
     result << "  Functional Test 3: ";
     {
-        LinkedListUnique<int> list;
+        LinkedList<int> list;
         result << (list.null() ? "Passed" : "Failed") << "\n";
     }
 
     result << "  Functional Test 4: ";
     {
-        LinkedListUnique<int> list;
+        LinkedList<int> list;
         list.push_front(10);
         list.push_front(20);
         list.clear();
@@ -138,7 +138,7 @@ std::string runLinkedListUniqueTests() {
     result << "  Load Test 1 (Small): ";
     {
         auto start = std::chrono::high_resolution_clock::now();
-        LinkedListUnique<int> list;
+        LinkedList<int> list;
         for (int i = 0; i < 1000; ++i) {
             list.push_front(i);
         }
@@ -150,7 +150,7 @@ std::string runLinkedListUniqueTests() {
     result << "  Load Test 2 (Large): ";
     {
         auto start = std::chrono::high_resolution_clock::now();
-        LinkedListUnique<int> list;
+        LinkedList<int> list;
         for (int i = 0; i < 1'000'000; ++i) {
             list.push_front(i);
         }

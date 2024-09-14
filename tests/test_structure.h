@@ -2,24 +2,24 @@
 #include "../src/smart_ptrs.h"
 
 template<typename T>
-struct NodeUnique {
+struct Node {
     T data;
-    UnqPtr<NodeUnique<T>> next;
+    UnqPtr<Node<T>> next;
 
-    explicit NodeUnique(T val) : data(val), next(nullptr) {}
+    explicit Node(T val) : data(val), next(nullptr) {}
 };
 
 template<typename T>
-class LinkedListUnique {
+class LinkedList {
 private:
-    UnqPtr<NodeUnique<T>> head;
+    UnqPtr<Node<T>> head;
     size_t length;
 
 public:
-    LinkedListUnique() : head(nullptr), length(0) {}
+    LinkedList() : head(nullptr), length(0) {}
 
     void push_front(const T& value) {
-        UnqPtr<NodeUnique<T>> newNode = UnqPtr<NodeUnique<T>>(new NodeUnique<T>(value));
+        UnqPtr<Node<T>> newNode = UnqPtr<Node<T>>(new Node<T>(value));
         newNode->next = std::move(head);
         head = std::move(newNode);
         ++length;
@@ -31,7 +31,7 @@ public:
 
     void pop_front() {
         if (!head.null()) {
-            UnqPtr<NodeUnique<T>> oldHead = std::move(head);
+            UnqPtr<Node<T>> oldHead = std::move(head);
             head = std::move(oldHead->next);
             --length;
         }
@@ -46,7 +46,7 @@ public:
             pop_front();
         }
     }
-    ~LinkedListUnique(){
+    ~LinkedList(){
         clear();
     }
 };
