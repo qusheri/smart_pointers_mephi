@@ -1,7 +1,6 @@
 #pragma once
 #include <cstddef>
 #include <utility>
-
 template<typename T>
 class UnqPtr {
 private:
@@ -9,7 +8,9 @@ private:
 
 public:
     explicit UnqPtr(T *p = nullptr) : ptr(p) {}
-    ~UnqPtr() { delete ptr; }
+    ~UnqPtr() {
+        delete ptr;
+    }
 
     UnqPtr(const UnqPtr &) = delete;
     UnqPtr &operator=(const UnqPtr &) = delete;
@@ -29,6 +30,7 @@ public:
 
     T &operator*() const { return *ptr; }
     T *operator->() const { return ptr; }
+    T &operator[]() const { return (*ptr)[]; }
     T *get() const { return ptr; }
 
     void reset(T *p = nullptr) {
@@ -41,7 +43,12 @@ public:
         ptr = nullptr;
         return temp;
     }
+
+    bool null(){
+        return ptr == nullptr;
+    }
 };
+
 
 template<typename T>
 class ShrdPtr {
@@ -89,10 +96,14 @@ public:
 
     void reset(UnqPtr<T> *p = nullptr) {
         if (referenceCount && --(*referenceCount) == 0) {
-            delete uptr;
+            uptr = nullptr;
             delete referenceCount;
         }
         uptr = p;
         referenceCount = new size_t(1);
+    }
+
+    bool null(){
+        return uptr->null();
     }
 };

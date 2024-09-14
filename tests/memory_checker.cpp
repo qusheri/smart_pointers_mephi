@@ -5,7 +5,7 @@
 size_t measureMemoryUsage() {
     PROCESS_MEMORY_COUNTERS pmc;
     if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc))) {
-        return pmc.WorkingSetSize; // in bytes
+        return pmc.WorkingSetSize; // в байтсах
     }
     return 0;
 }

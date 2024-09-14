@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-
+#include "test_structure.h"
 std::string runUnqPtrTests() {
     std::ostringstream result;
     result << "UnqPtr Tests:\n";
@@ -40,7 +40,7 @@ std::string runUnqPtrTests() {
     {
         auto start = std::chrono::high_resolution_clock::now();
         std::vector<UnqPtr<int>> pointers;
-        for (int i = 0; i < 1000000; ++i) {
+        for (int i = 0; i < 100'000'000; ++i) {
             pointers.push_back(UnqPtr<int>(new int(i)));
         }
         auto end = std::chrono::high_resolution_clock::now();
@@ -95,6 +95,68 @@ std::string runShrdPtrTests() {
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         result << "Time: " << duration << " ms\n";
+    }
+
+    return result.str();
+}
+
+
+std::string runLinkedListUniqueTests() {
+    std::ostringstream result;
+    result << "LinkedListUnique Tests:\n";
+
+    result << "  Functional Test 1: ";
+    {
+        LinkedListUnique<int> list;
+        list.push_front(10);
+        result << (list.size() == 1 ? "Passed" : "Failed") << "\n";
+    }
+
+    result << "  Functional Test 2: ";
+    {
+        LinkedListUnique<int> list;
+        list.push_front(10);
+        list.pop_front();
+        result << (list.size() == 0 ? "Passed" : "Failed") << "\n";
+    }
+
+    result << "  Functional Test 3: ";
+    {
+        LinkedListUnique<int> list;
+        result << (list.null() ? "Passed" : "Failed") << "\n";
+    }
+
+    result << "  Functional Test 4: ";
+    {
+        LinkedListUnique<int> list;
+        list.push_front(10);
+        list.push_front(20);
+        list.clear();
+        result << (list.size() == 0 && list.null() ? "Passed" : "Failed") << "\n";
+    }
+
+    result << "  Load Test 1 (Small): ";
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        LinkedListUnique<int> list;
+        for (int i = 0; i < 1000; ++i) {
+            list.push_front(i);
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        result << "Time: " << duration << " ms, Size: " << list.size() << "\n";
+    }
+
+    result << "  Load Test 2 (Large): ";
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        LinkedListUnique<int> list;
+        for (int i = 0; i < 1'000'000; ++i) {
+            list.push_front(i);
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        result << "Time: " << duration << " ms, Size: " << list.size() << "\n";
     }
 
     return result.str();

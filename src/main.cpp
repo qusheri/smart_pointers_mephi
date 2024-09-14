@@ -1,32 +1,30 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QMenuBar>
-#include <QMessageBox>
 #include <QTextEdit>
 #include <chrono>
 #include "../tests/smart_ptrs_tests.h"
 #include "../tests/memory_checker.h"
-
+#include "../tests/test_structure.h"
 class MainWindow : public QMainWindow {
 public:
     MainWindow() {
         setWindowTitle("Smart Pointer Test Menu");
 
-        // Создаем меню
         QMenu *fileMenu = menuBar()->addMenu("Tests");
 
-        // Пункт меню для теста производительности UnqPtr
         QAction *runUnqPtrTestsAction = new QAction("Run UnqPtr Tests", this);
         connect(runUnqPtrTestsAction, &QAction::triggered, this, &MainWindow::runUnqPtrTestsSlot);
         fileMenu->addAction(runUnqPtrTestsAction);
 
-        // Пункт меню для теста производительности ShrdPtr
         QAction *runShrdPtrTestsAction = new QAction("Run ShrdPtr Tests", this);
         connect(runShrdPtrTestsAction, &QAction::triggered, this, &MainWindow::runShrdPtrTestsSlot);
         fileMenu->addAction(runShrdPtrTestsAction);
 
+        QAction *runLinkedListTestsAction = new QAction("Run LinkedList Tests", this);
+        connect(runLinkedListTestsAction, &QAction::triggered, this, &MainWindow::runLinkedListUniqueSlot);
+        fileMenu->addAction(runLinkedListTestsAction);
 
-        // Пункт меню для выхода
         QAction *exitAction = new QAction("Exit", this);
         connect(exitAction, &QAction::triggered, this, &MainWindow::close);
         fileMenu->addAction(exitAction);
@@ -43,8 +41,13 @@ private slots:
         showResults("ShrdPtr Tests", results);
     }
 
+    void runLinkedListUniqueSlot() {
+        QString results = runTestsWithProfiling("LinkedList", runLinkedListUniqueTests);
+        showResults("LinkedList Tests", results);
+    }
+
+
     void showResults(const QString& title, const QString& results) {
-        // Окно с результатами
         QTextEdit *textEdit = new QTextEdit;
         textEdit->setPlainText(results);
         textEdit->setReadOnly(true);
@@ -56,19 +59,16 @@ private slots:
         resultsWindow->show();
     }
 
-    // Функция для запуска тестов с профилированием
     template<typename Func>
     QString runTestsWithProfiling(const QString& testName, Func testFunction) {
         QString results;
         results += "Running " + testName + " tests...\n";
 
-        // Профилирование времени
         auto start = std::chrono::high_resolution_clock::now();
-        testFunction();  // Запуск тестовой функции
+        testFunction();
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration = end - start;
 
-        // Профилирование памяти
         size_t memoryUsed = measureMemoryUsage();
 
         results += "Time taken: " + QString::number(duration.count()) + " seconds\n";
