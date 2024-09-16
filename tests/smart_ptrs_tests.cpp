@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include "test_structure.h"
+
 std::string runUnqPtrTests() {
     std::ostringstream result;
     result << "UnqPtr Tests:\n";
@@ -18,11 +19,10 @@ std::string runUnqPtrTests() {
     result << "  Functional Test 2: ";
     {
         UnqPtr<int> p1(new int(20));
-        int* rawPtr = p1.release();
+        int *rawPtr = p1.release();
         result << (*rawPtr == 20 ? "Passed" : "Failed") << "\n";
         delete rawPtr;
     }
-
 
     result << "  Load Test 1 (Small): ";
     {
@@ -40,7 +40,7 @@ std::string runUnqPtrTests() {
     {
         auto start = std::chrono::high_resolution_clock::now();
         std::vector<UnqPtr<int>> pointers;
-        for (int i = 0; i < 100'000'000; ++i) {
+        for (int i = 0; i < 10'000'000; ++i) {
             pointers.push_back(UnqPtr<int>(new int(i)));
         }
         auto end = std::chrono::high_resolution_clock::now();

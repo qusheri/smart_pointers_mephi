@@ -1,6 +1,8 @@
 #pragma once
+
 #include <cstddef>
 #include <utility>
+
 template<typename T>
 class UnqPtr {
 private:
@@ -49,19 +51,26 @@ public:
     }
 };
 
-
+//+delete[]
 template<typename T>
 class ShrdPtr {
 private:
-    UnqPtr<T> *uptr;
+    UnqPtr<T> *ptr;
     size_t *referenceCount;
 
+    void clean(){
+        if (referenceCount && --(*referenceCount) == 0) {
+            ptr = nullptr;
+            delete referenceCount;
+        }
+    }
+
 public:
-    explicit ShrdPtr(UnqPtr<T> *p = nullptr)
-            : uptr(p), referenceCount(new size_t(1)) {}
+    explicit ShrdPtr(UnqPtr<T> *p = nullptr) //перенос юника
+            : ptr(p), referenceCount(new size_t(1)) {}
 
     ShrdPtr(const ShrdPtr &other)
-            : uptr(other.uptr), referenceCount(other.referenceCount) {
+            : ptr(other.ptr), referenceCount(other.referenceCount) {
         if (referenceCount) {
             ++(*referenceCount);
         }
@@ -69,11 +78,14 @@ public:
 
     ShrdPtr &operator=(const ShrdPtr &other) {
         if (this != &other) {
-            if (referenceCount && --(*referenceCount) == 0) {
-                delete uptr;
-                delete referenceCount;
+            if(referenceCount) {
+                *referenceCount -= 1;
+                if (*referenceCount == 0) {
+                    delete ptr;
+                    delete referenceCount;
+                }
             }
-            uptr = other.uptr;
+            ptr = other.ptr;
             referenceCount = other.referenceCount;
             if (referenceCount) {
                 ++(*referenceCount);
@@ -81,29 +93,22 @@ public:
         }
         return *this;
     }
-
     ~ShrdPtr() {
-        if (referenceCount && --(*referenceCount) == 0) {
-            uptr = nullptr;
-            delete referenceCount;
-        }
+        clean();
     }
 
-    T &operator*() const { return *uptr->get(); }
-    T *operator->() const { return uptr->get(); }
+    T &operator*() const { return *ptr->get(); }
+    T *operator->() const { return ptr->get(); }
 
     size_t use_count() const { return referenceCount ? *referenceCount : 0; }
 
     void reset(UnqPtr<T> *p = nullptr) {
-        if (referenceCount && --(*referenceCount) == 0) {
-            uptr = nullptr;
-            delete referenceCount;
-        }
-        uptr = p;
+        clean();
+        ptr = p;
         referenceCount = new size_t(1);
     }
 
     bool null(){
-        return uptr->null();
+        return ptr->null();
     }
 };
