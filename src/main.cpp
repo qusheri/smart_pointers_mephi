@@ -25,6 +25,14 @@ public:
         connect(runLinkedListTestsAction, &QAction::triggered, this, &MainWindow::runLinkedListUniqueSlot);
         fileMenu->addAction(runLinkedListTestsAction);
 
+        QAction *runStdUnqPtrTestsAction = new QAction("Run std::unique_ptr Tests", this);
+        connect(runStdUnqPtrTestsAction, &QAction::triggered, this, &MainWindow::runStdUnqPtrTestsSlot);
+        fileMenu->addAction(runStdUnqPtrTestsAction);
+
+        QAction *runStdShrdPtrTestsAction = new QAction("Run std::shared_ptr Tests", this);
+        connect(runStdShrdPtrTestsAction, &QAction::triggered, this, &MainWindow::runStdShrdPtrTestsSlot);
+        fileMenu->addAction(runStdShrdPtrTestsAction);
+
         QAction *exitAction = new QAction("Exit", this);
         connect(exitAction, &QAction::triggered, this, &MainWindow::close);
         fileMenu->addAction(exitAction);
@@ -46,6 +54,15 @@ private slots:
         showResults("LinkedList Tests", results);
     }
 
+    void runStdUnqPtrTestsSlot() {
+        QString results = runTestsWithProfiling("std::unique_ptr", runStdUnqPtrTests);
+        showResults("std::unique_ptr Tests", results);
+    }
+
+    void runStdShrdPtrTestsSlot() {
+        QString results = runTestsWithProfiling("std::shared_ptr", runStdShrdPtrTests);
+        showResults("std::shared_ptr Tests", results);
+    }
 
     void showResults(const QString& title, const QString& results) {
         QTextEdit *textEdit = new QTextEdit;
@@ -65,7 +82,7 @@ private slots:
         results += "Running " + testName + " tests...\n";
 
         auto start = std::chrono::high_resolution_clock::now();
-        testFunction();
+        results += testFunction();
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration = end - start;
 
@@ -77,6 +94,7 @@ private slots:
         return results;
     }
 };
+
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);

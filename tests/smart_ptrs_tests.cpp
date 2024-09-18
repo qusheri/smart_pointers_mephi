@@ -5,7 +5,7 @@
 #include <sstream>
 #include <vector>
 #include "test_structure.h"
-
+#include "memory"
 std::string runUnqPtrTests() {
     std::ostringstream result;
     result << "UnqPtr Tests:\n";
@@ -157,6 +157,95 @@ std::string runLinkedListUniqueTests() {
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         result << "Time: " << duration << " ms, Size: " << list.size() << "\n";
+    }
+
+    return result.str();
+}
+
+std::string runStdUnqPtrTests() {
+    std::ostringstream result;
+    result << "std::unique_ptr Tests:\n";
+
+    result << "  Functional Test 1: ";
+    {
+        std::unique_ptr<int> p1(new int(10));
+        result << (*p1 == 10 ? "Passed" : "Failed") << "\n";
+    }
+
+    result << "  Functional Test 2: ";
+    {
+        std::unique_ptr<int> p1(new int(20));
+        int *rawPtr = p1.release();
+        result << (*rawPtr == 20 ? "Passed" : "Failed") << "\n";
+        delete rawPtr;
+    }
+
+    result << "  Load Test 1 (Small): ";
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        std::vector<std::unique_ptr<int>> pointers;
+        for (int i = 0; i < 1000; ++i) {
+            pointers.push_back(std::unique_ptr<int>(new int(i)));
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        result << "Time: " << duration << " ms\n";
+    }
+
+    result << "  Load Test 2 (Large): ";
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        std::vector<std::unique_ptr<int>> pointers;
+        for (int i = 0; i < 10'000'000; ++i) {
+            pointers.push_back(std::unique_ptr<int>(new int(i)));
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        result << "Time: " << duration << " ms\n";
+    }
+
+    return result.str();
+}
+
+std::string runStdShrdPtrTests() {
+    std::ostringstream result;
+    result << "std::shared_ptr Tests:\n";
+
+    result << "  Functional Test 1: ";
+    {
+        std::shared_ptr<int> p1 = std::make_shared<int>(10);
+        result << (*p1 == 10 ? "Passed" : "Failed") << "\n";
+    }
+
+    result << "  Functional Test 2: ";
+    {
+        std::shared_ptr<int> p1 = std::make_shared<int>(20);
+        std::shared_ptr<int> p2 = p1;
+        result << (*p2 == 20 ? "Passed" : "Failed") << "\n";
+    }
+
+    result << "  Load Test 1 (Small): ";
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        std::vector<std::shared_ptr<int>> pointers;
+        for (int i = 0; i < 1000; ++i) {
+            pointers.push_back(std::make_shared<int>(i));
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        result << "Time: " << duration << " ms\n";
+    }
+
+    result << "  Load Test 2 (Large): ";
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        std::vector<std::shared_ptr<int>> pointers;
+        for (int i = 0; i < 1'000'000; ++i) {
+            pointers.push_back(std::make_shared<int>(i));
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        result << "Time: " << duration << " ms\n";
     }
 
     return result.str();
