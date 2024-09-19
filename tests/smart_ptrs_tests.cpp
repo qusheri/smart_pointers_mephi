@@ -3,7 +3,6 @@
 #include <chrono>
 #include <iostream>
 #include <sstream>
-#include <vector>
 #include "test_structure.h"
 #include "memory"
 std::string runUnqPtrTests() {
@@ -68,7 +67,7 @@ std::string runShrdPtrTests() {
         UnqPtr<int> uptr(new int(20));
         ShrdPtr<int> p1(&uptr);
         ShrdPtr<int> p2 = std::move(p1);
-        result << (*p2 == 20 ? "Passed" : "Failed") << "\n";
+        result << (*p2 == 20 && *p1 == 20 ? "Passed" : "Failed") << "\n";
     }
 
     result << "  Load Test 1 (Small): ";
@@ -249,4 +248,77 @@ std::string runStdShrdPtrTests() {
     }
 
     return result.str();
+}
+
+//for charts(для графиков)
+
+std::vector<std::pair<int, long long>> loadUnqPtrTests() {
+    std::vector<std::pair<int, long long>> result;
+    std::vector<int> test_sizes = {10'000, 100'000, 1'000'000, 10'000'000};
+    for(int test_size: test_sizes) {
+        auto start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < test_size; ++i) {
+            UnqPtr<int>(new int(i));
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        result.push_back({test_size, duration});
+    }
+
+    return result;
+}
+
+
+std::vector<std::pair<int, long long>> loadShrdPtrTests() {
+    std::vector<std::pair<int, long long>> result;
+    std::vector<int> test_sizes = {10'000, 100'000, 1'000'000, 10'000'000};
+    for(int test_size: test_sizes) {
+        auto start = std::chrono::high_resolution_clock::now();
+        {
+            std::vector<ShrdPtr<int>> pointers;
+            UnqPtr<int> uptr(new int(3));
+            ShrdPtr<int> sptr(&uptr);
+            for (int i = 0; i < test_size; ++i) {
+                pointers.push_back(ShrdPtr<int>(sptr));
+            }
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        result.push_back({test_size, duration});
+    }
+    return result;
+}
+
+std::vector<std::pair<int, long long>> loadStdUnqPtrTests() {
+    std::vector<std::pair<int, long long>> result;
+    std::vector<int> test_sizes = {10'000, 100'000, 1'000'000, 10'000'000};
+    for(int test_size: test_sizes){
+        auto start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < test_size; ++i) {
+            std::unique_ptr<int>(new int(i));
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        result.push_back({test_size, duration});
+    }
+
+    return result;
+}
+
+std::vector<std::pair<int, long long>> loadStdShrdPtrTests() {
+    std::vector<std::pair<int, long long>> result;
+    std::vector<int> test_sizes = {10'000, 100'000, 1'000'000, 10'000'000};
+    auto start = std::chrono::high_resolution_clock::now();
+    for(int test_size: test_sizes) {
+        {
+            std::vector<std::shared_ptr<int>> pointers;
+            for (int i = 0; i < test_size; ++i) {
+                pointers.push_back(std::make_shared<int>(i));
+            }
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        result.push_back({test_size, duration});
+    }
+    return result;
 }
