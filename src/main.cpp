@@ -3,7 +3,6 @@
 #include <QMenuBar>
 #include <QTextEdit>
 #include <chrono>
-#include <iostream>
 #include "../tests/smart_ptrs_tests.h"
 #include "../tests/memory_checker.h"
 #include "../tests/test_structure.h"
@@ -223,24 +222,36 @@ private slots:
         QLineSeries *unqPtrSeries = new QLineSeries();
         unqPtrSeries->setName("UnqPtr");
 
+        QScatterSeries *unqPtrScatterSeries = new QScatterSeries();
+        unqPtrScatterSeries->setName("UnqPtr Points");
+        unqPtrScatterSeries->setMarkerSize(8);
+
         QLineSeries *stdUnqPtrSeries = new QLineSeries();
         stdUnqPtrSeries->setName("std::unique_ptr");
 
-        auto UnqPtrTests = loadUnqPtrTests();
-        auto StdUnqPtrTests = loadStdUnqPtrTests();
+        QScatterSeries *stdUnqPtrScatterSeries = new QScatterSeries();
+        stdUnqPtrScatterSeries->setName("std::unique_ptr Points");
+        stdUnqPtrScatterSeries->setMarkerSize(8);
 
-        for(auto test: UnqPtrTests){
+        auto tests = Unq_tests();
+
+        auto UnqPtrTests = tests[0];
+        auto StdUnqPtrTests = tests[1];
+
+        for(auto test: UnqPtrTests) {
             unqPtrSeries->append(test.second, test.first);
-            std::cout << test.second << ' ' << test.first << '\n';
+            unqPtrScatterSeries->append(test.second, test.first);
         }
-        for(auto test: StdUnqPtrTests){
+        for(auto test: StdUnqPtrTests) {
             stdUnqPtrSeries->append(test.second, test.first);
-            std::cout << test.second << ' ' << test.first << '\n';
+            stdUnqPtrScatterSeries->append(test.second, test.first);
         }
 
         QChart *chart = new QChart();
         chart->addSeries(unqPtrSeries);
+        chart->addSeries(unqPtrScatterSeries);
         chart->addSeries(stdUnqPtrSeries);
+        chart->addSeries(stdUnqPtrScatterSeries);
         chart->setTitle("UnqPtr vs std::unique_ptr Performance Comparison");
 
         QValueAxis *axisX = new QValueAxis();
@@ -254,8 +265,12 @@ private slots:
 
         unqPtrSeries->attachAxis(axisX);
         unqPtrSeries->attachAxis(axisY);
+        unqPtrScatterSeries->attachAxis(axisX);
+        unqPtrScatterSeries->attachAxis(axisY);
         stdUnqPtrSeries->attachAxis(axisX);
         stdUnqPtrSeries->attachAxis(axisY);
+        stdUnqPtrScatterSeries->attachAxis(axisX);
+        stdUnqPtrScatterSeries->attachAxis(axisY);
 
         QChartView *chartView = new QChartView(chart);
         chartView->setRenderHint(QPainter::Antialiasing);
@@ -265,29 +280,42 @@ private slots:
         chartWindow->resize(800, 600);
         chartWindow->show();
     }
+
     void showComparisonChartShared() {
         QLineSeries *ShrdPtrSeries = new QLineSeries();
         ShrdPtrSeries->setName("ShrdPtr");
 
+        QScatterSeries *ShrdPtrScatterSeries = new QScatterSeries();
+        ShrdPtrScatterSeries->setName("ShrdPtr Points");
+        ShrdPtrScatterSeries->setMarkerSize(8);
+
         QLineSeries *stdShrdPtrSeries = new QLineSeries();
         stdShrdPtrSeries->setName("std::shared_ptr");
 
-        auto ShrdPtrTests = loadShrdPtrTests();
-        auto StdShrdPtrTests = loadStdShrdPtrTests();
+        QScatterSeries *stdShrdPtrScatterSeries = new QScatterSeries();
+        stdShrdPtrScatterSeries->setName("std::shared_ptr Points");
+        stdShrdPtrScatterSeries->setMarkerSize(8);
 
-        for(auto test: ShrdPtrTests){
+        auto tests = Shrd_tests();
+
+        auto ShrdPtrTests = tests[0];
+        auto StdShrdPtrTests = tests[1];
+
+        for(auto test: ShrdPtrTests) {
             ShrdPtrSeries->append(test.second, test.first);
-            std::cout << test.second << ' ' << test.first << '\n';
+            ShrdPtrScatterSeries->append(test.second, test.first);
         }
-        for(auto test: StdShrdPtrTests){
+        for(auto test: StdShrdPtrTests) {
             stdShrdPtrSeries->append(test.second, test.first);
-            std::cout << test.second << ' ' << test.first << '\n';
+            stdShrdPtrScatterSeries->append(test.second, test.first);
         }
 
         QChart *chart = new QChart();
         chart->addSeries(ShrdPtrSeries);
+        chart->addSeries(ShrdPtrScatterSeries);
         chart->addSeries(stdShrdPtrSeries);
-        chart->setTitle("UnqPtr vs std::unique_ptr Performance Comparison");
+        chart->addSeries(stdShrdPtrScatterSeries);
+        chart->setTitle("ShrdPtr vs std::shared_ptr Performance Comparison");
 
         QValueAxis *axisX = new QValueAxis();
         axisX->setTitleText("Performance Time (ms)");
@@ -300,8 +328,12 @@ private slots:
 
         ShrdPtrSeries->attachAxis(axisX);
         ShrdPtrSeries->attachAxis(axisY);
+        ShrdPtrScatterSeries->attachAxis(axisX);
+        ShrdPtrScatterSeries->attachAxis(axisY);
         stdShrdPtrSeries->attachAxis(axisX);
         stdShrdPtrSeries->attachAxis(axisY);
+        stdShrdPtrScatterSeries->attachAxis(axisX);
+        stdShrdPtrScatterSeries->attachAxis(axisY);
 
         QChartView *chartView = new QChartView(chart);
         chartView->setRenderHint(QPainter::Antialiasing);
@@ -311,7 +343,18 @@ private slots:
         chartWindow->resize(800, 600);
         chartWindow->show();
     }
+
 private:
+    std::vector<std::vector<std::pair<int, long long>>> Shrd_tests(){
+        auto ShrdPtrTests = loadShrdPtrTests();
+        auto StdShrdPtrTests = loadStdShrdPtrTests();
+        return {ShrdPtrTests,StdShrdPtrTests};
+    }
+    std::vector<std::vector<std::pair<int, long long>>> Unq_tests(){
+        auto UnqPtrTests = loadUnqPtrTests();
+        auto StdUnqPtrTests = loadStdUnqPtrTests();
+        return {UnqPtrTests, StdUnqPtrTests};
+    }
     UnqPtr<int> uniq_ptr;
     ShrdPtr<int> shared_ptr;
 };
