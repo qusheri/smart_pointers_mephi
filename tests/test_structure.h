@@ -1,4 +1,3 @@
-#include <iostream>
 #include "../src/smart_ptrs.h"
 
 template<typename T>
@@ -46,7 +45,15 @@ public:
             pop_front();
         }
     }
+
     ~LinkedList(){
         clear();
     }
+
+    T& get_front() const {
+        if(!head.null()){
+            return head->data;
+        }
+    }
+
 };

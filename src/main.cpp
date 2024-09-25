@@ -3,12 +3,14 @@
 #include <QMenuBar>
 #include <QTextEdit>
 #include <chrono>
+#include <iostream>
 #include "../tests/smart_ptrs_tests.h"
 #include "../tests/memory_checker.h"
 #include "../tests/test_structure.h"
 #include "QtCharts"
 #include "QtWidgets"
 #include "algorithm"
+
 class MainWindow : public QMainWindow {
 public:
     MainWindow() {
@@ -18,6 +20,43 @@ public:
         QMenu *shrd = menuBar()->addMenu("shared_ptrs");
         QMenu *uniq = menuBar()->addMenu("uniq_ptrs");
 
+        QMenu *ptrManagement = menuBar()->addMenu("Pointer Management");
+
+        QAction *createUnqPtrAction = new QAction("Create Unqptr", this);
+        connect(createUnqPtrAction, &QAction::triggered, this, &MainWindow::createUnqPtrSlot);
+        ptrManagement->addAction(createUnqPtrAction);
+
+        QAction *rewriteUnqPtrAction = new QAction("Rewrite Unqptr", this);
+        connect(rewriteUnqPtrAction, &QAction::triggered, this, &MainWindow::rewriteUnqPtrSlot);
+        ptrManagement->addAction(rewriteUnqPtrAction);
+
+        QAction *releaseUnqPtrAction = new QAction("Release Unqptr", this);
+        connect(releaseUnqPtrAction, &QAction::triggered, this, &MainWindow::releaseUnqPtrSlot);
+        ptrManagement->addAction(releaseUnqPtrAction);
+
+        QAction *getvalUnqPtrAction = new QAction("Get val of Unqptr", this);
+        connect(getvalUnqPtrAction, &QAction::triggered, this, &MainWindow::getvalUnqPtrSlot);
+        ptrManagement->addAction(getvalUnqPtrAction);
+
+        QAction *createShrdPtrAction = new QAction("Create shared ptr", this);
+        connect(createShrdPtrAction, &QAction::triggered, this, &MainWindow::createShrdPtrSlot);
+        ptrManagement->addAction(createShrdPtrAction);
+
+        QAction *rewriteShrdPtrAction = new QAction("Rewrite shared ptr", this);
+        connect(rewriteShrdPtrAction, &QAction::triggered, this, &MainWindow::rewriteShrdPtrSlot);
+        ptrManagement->addAction(rewriteShrdPtrAction);
+
+        QAction *releaseShrdPtrAction = new QAction("Release shared ptr", this);
+        connect(releaseShrdPtrAction, &QAction::triggered, this, &MainWindow::releaseShrdPtrSlot);
+        ptrManagement->addAction(releaseShrdPtrAction);
+
+        QAction *getvalShrdPtrAction = new QAction("Get val of shared ptr", this);
+        connect(getvalShrdPtrAction, &QAction::triggered, this, &MainWindow::getvalShrdPtrSlot);
+        ptrManagement->addAction(getvalShrdPtrAction);
+
+
+        
+        
         QAction *runUnqPtrTestsAction = new QAction("Run UnqPtr Tests", this);
         connect(runUnqPtrTestsAction, &QAction::triggered, this, &MainWindow::runUnqPtrTestsSlot);
         uniq->addAction(runUnqPtrTestsAction);
@@ -54,32 +93,78 @@ public:
     }
 
 private slots:
-    void runUnqPtrTestsSlot() {
-        QString results = runTestsWithProfiling("UnqPtr", runUnqPtrTests);
-        showResults("UnqPtr Tests", results);
+    void createUnqPtrSlot(bool for_rewrite = false) {
+        bool ok;
+        int value = QInputDialog::getInt(this, "Input Value", "Enter an integer value for UnqPtr:", 0, INT_MIN, INT_MAX, 1, &ok);
+
+        if (ok) {
+            uniq_ptr = UnqPtr<int>(new int(value));
+            QString result = "Created UnqPtr with value: " + QString::number(*uniq_ptr);
+            if(!for_rewrite) showResults("UnqPtr", result, 400, 300);
+        }
     }
 
-    void runShrdPtrTestsSlot() {
-        QString results = runTestsWithProfiling("ShrdPtr", runShrdPtrTests);
-        showResults("ShrdPtr Tests", results);
+    void rewriteUnqPtrSlot() {
+        uniq_ptr.release();
+        createUnqPtrSlot(true);
+        QString result = "Rewrited UnqPtr with value: " + QString::number(*uniq_ptr);
+        showResults("UnqPtr", result, 400, 300);
     }
 
-    void runLinkedListUniqueSlot() {
-        QString results = runTestsWithProfiling("LinkedList", runLinkedListUniqueTests);
-        showResults("LinkedList Tests", results);
+    void releaseUnqPtrSlot() {
+        uniq_ptr.release();
+        QString result = "UnqPtr has been released";
+        showResults("UnqPtr", result, 400, 300);
     }
 
-    void runStdUnqPtrTestsSlot() {
-        QString results = runTestsWithProfiling("std::unique_ptr", runStdUnqPtrTests);
-        showResults("std::unique_ptr Tests", results);
+    void getvalUnqPtrSlot() {
+        if(!uniq_ptr.null()) {
+            QString result = "UnqPtr value: " + QString::number(*uniq_ptr);
+            showResults("UnqPtr", result, 400, 300);
+        }
+        else{
+            QString result = "UnqPtr value: null";
+            showResults("UnqPtr", result, 400, 300);
+        }
     }
 
-    void runStdShrdPtrTestsSlot() {
-        QString results = runTestsWithProfiling("std::shared_ptr", runStdShrdPtrTests);
-        showResults("std::shared_ptr Tests", results);
+    void createShrdPtrSlot(bool for_rewrite = false) {
+        bool ok;
+        int value = QInputDialog::getInt(this, "Input Value", "Enter an integer value for ShrdPtr:", 0, INT_MIN, INT_MAX, 1, &ok);
+
+        if (ok) {
+            shared_ptr = ShrdPtr<int>(new int(value));
+            QString result = "Created ShrdPtr with value: " + QString::number(*shared_ptr);
+            if(!for_rewrite) showResults("ShrdPtr", result, 400, 300);
+        }
     }
 
-    void showResults(const QString& title, const QString& results) {
+
+    void rewriteShrdPtrSlot() {
+        shared_ptr.reset();
+        createShrdPtrSlot(true);
+        QString result = "Rewrited ShrdPtr with value: " + QString::number(*shared_ptr);
+        showResults("ShrdPtr", result, 400, 300);
+    }
+    
+    void releaseShrdPtrSlot() {
+        shared_ptr.reset();
+        QString result = "ShrdPtr has been released";
+        showResults("ShrdPtr", result, 400, 300);
+    }
+    
+    void getvalShrdPtrSlot() {
+        if(!shared_ptr.null()) {
+            QString result = "ShrdPtr value: " + QString::number(*shared_ptr);
+            showResults("ShrdPtr", result, 400, 300);
+        }
+        else{
+            QString result = "ShrdPtr value: null";
+            showResults("ShrdPtr", result, 400, 300);
+        }
+    }
+
+    void showResults(const QString& title, const QString& results, int w, int h) {
         QTextEdit *textEdit = new QTextEdit;
         textEdit->setPlainText(results);
         textEdit->setReadOnly(true);
@@ -87,9 +172,35 @@ private slots:
         QMainWindow *resultsWindow = new QMainWindow;
         resultsWindow->setWindowTitle(title);
         resultsWindow->setCentralWidget(textEdit);
-        resultsWindow->resize(600, 400);
+        resultsWindow->resize(w, h);
         resultsWindow->show();
     }
+
+    void runUnqPtrTestsSlot() {
+        QString results = runTestsWithProfiling("UnqPtr", runUnqPtrTests);
+        showResults("UnqPtr Tests", results, 600, 400);
+    }
+
+    void runShrdPtrTestsSlot() {
+        QString results = runTestsWithProfiling("ShrdPtr", runShrdPtrTests);
+        showResults("ShrdPtr Tests", results, 600, 400);
+    }
+
+    void runLinkedListUniqueSlot() {
+        QString results = runTestsWithProfiling("LinkedList", runLinkedListUniqueTests);
+        showResults("LinkedList Tests", results, 600, 400);
+    }
+
+    void runStdUnqPtrTestsSlot() {
+        QString results = runTestsWithProfiling("std::unique_ptr", runStdUnqPtrTests);
+        showResults("std::unique_ptr Tests", results, 600, 400);
+    }
+
+    void runStdShrdPtrTestsSlot() {
+        QString results = runTestsWithProfiling("std::shared_ptr", runStdShrdPtrTests);
+        showResults("std::shared_ptr Tests", results, 600, 400);
+    }
+
 
     template<typename Func>
     QString runTestsWithProfiling(const QString& testName, Func testFunction) {
@@ -200,6 +311,9 @@ private slots:
         chartWindow->resize(800, 600);
         chartWindow->show();
     }
+private:
+    UnqPtr<int> uniq_ptr;
+    ShrdPtr<int> shared_ptr;
 };
 
 

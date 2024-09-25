@@ -33,7 +33,6 @@ public:
     T &operator*() const { return *ptr; }
     T *operator->() const { return ptr; }
     T &operator[]() const { return (*ptr)[]; }
-    T *get() const { return ptr; }
 
     void reset(T *p = nullptr) {
         delete ptr;
@@ -46,7 +45,7 @@ public:
         return temp;
     }
 
-    bool null(){
+    bool null() const {
         return ptr == nullptr;
     }
 };
@@ -82,7 +81,6 @@ public:
     T &operator*() const { return *ptr; }
     T *operator->() const { return ptr; }
     T &operator[]() const { return (*ptr)[]; }
-    T *get() const { return ptr; }
 
     void reset(T *p = nullptr) {
         delete[] ptr;
@@ -95,7 +93,7 @@ public:
         return temp;
     }
 
-    bool null(){
+    bool null() const {
         return ptr == nullptr;
     }
 };
@@ -103,7 +101,7 @@ public:
 template<typename T>
 class ShrdPtr {
 private:
-    T *ptr;
+    T* ptr;
     size_t *referenceCount;
 
     void clean(){
@@ -114,7 +112,7 @@ private:
     }
 
 public:
-    explicit ShrdPtr(UnqPtr<T> *p = nullptr) : ptr(p->release()), referenceCount(new size_t(1)) {}
+    explicit ShrdPtr(T *p = nullptr) : ptr(p), referenceCount(new size_t(1)) {}
 
     ShrdPtr(const ShrdPtr &other)
             : ptr(other.ptr), referenceCount(other.referenceCount) {
@@ -125,13 +123,7 @@ public:
 
     ShrdPtr &operator=(const ShrdPtr &other) {
         if (this != &other) {
-            if(referenceCount) {
-                *referenceCount -= 1;
-                if (*referenceCount == 0) {
-                    delete ptr;
-                    delete referenceCount;
-                }
-            }
+            clean();
             ptr = other.ptr;
             referenceCount = other.referenceCount;
             if (referenceCount) {
@@ -149,33 +141,32 @@ public:
 
     size_t use_count() const { return referenceCount ? *referenceCount : 0; }
 
-    void reset(UnqPtr<T> *p = nullptr) {
+    void reset(T *p = nullptr) {
         clean();
         ptr = p;
         referenceCount = new size_t(1);
     }
 
-    bool null(){
+    bool null() const {
         return ptr == nullptr;
     }
 };
 
-
 template<typename T>
 class ShrdPtr<T[]> {
 private:
-    T *ptr;
+    T* ptr;
     size_t *referenceCount;
 
     void clean(){
         if (referenceCount && --(*referenceCount) == 0) {
-            delete[] ptr;
+            delete ptr[];
             delete referenceCount;
         }
     }
 
 public:
-    explicit ShrdPtr(UnqPtr<T> *p = nullptr) : ptr(p->release()), referenceCount(new size_t(1)) {}
+    explicit ShrdPtr(T *p = nullptr) : ptr(p), referenceCount(new size_t(1)) {}
 
     ShrdPtr(const ShrdPtr &other)
             : ptr(other.ptr), referenceCount(other.referenceCount) {
@@ -186,13 +177,7 @@ public:
 
     ShrdPtr &operator=(const ShrdPtr &other) {
         if (this != &other) {
-            if(referenceCount) {
-                *referenceCount -= 1;
-                if (*referenceCount == 0) {
-                    delete ptr;
-                    delete referenceCount;
-                }
-            }
+            clean();
             ptr = other.ptr;
             referenceCount = other.referenceCount;
             if (referenceCount) {
@@ -210,13 +195,13 @@ public:
 
     size_t use_count() const { return referenceCount ? *referenceCount : 0; }
 
-    void reset(UnqPtr<T> *p = nullptr) {
+    void reset(T *p = nullptr) {
         clean();
         ptr = p;
         referenceCount = new size_t(1);
     }
 
-    bool null(){
+    bool null() const {
         return ptr == nullptr;
     }
 };
